@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion | ESMT Collab Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: white; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center p-4">
+    <div class="glass p-8 rounded-2xl w-full max-w-md shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-400 italic tracking-tight">ESMT Collab</h1>
+            <p class="text-slate-400 mt-2">Identifiez-vous pour gérer vos tâches</p>
+        </div>
+
+        {% if form.errors %}
+        <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-4 text-sm text-center">
+            Identifiants incorrects. Veuillez réessayer.
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-sm mb-2 text-slate-300">Nom d'utilisateur</label>
+                <input type="text" name="username" required class="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:outline-none focus:border-blue-500 transition">
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm mb-2 text-slate-300">Mot de passe</label>
+                <input type="password" name="password" required class="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:outline-none focus:border-blue-500 transition">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-blue-500/20">
+                Se connecter
+            </button>
+        </form>
+
+        <p class="text-center mt-6 text-sm text-slate-500">
+            Pas encore de compte ? <a href="{% url 'inscription' %}" class="text-blue-400 hover:underline">Inscrivez-vous ici</a>
+        </p>
+    </div>
+</body>
+</html>

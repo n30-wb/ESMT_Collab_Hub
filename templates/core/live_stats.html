@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>ESMT | API Live Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; }
+        .loader { border-top-color: #3b82f6; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-end mb-10">
+            <div>
+                <h1 class="text-3xl font-bold">Consommation <span class="text-blue-400">API REST</span></h1>
+                <p class="text-slate-400">Données récupérées dynamiquement depuis /api/projets/</p>
+            </div>
+            <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition text-sm font-bold">
+                <i class="fas fa-sync-alt mr-2"></i> Actualiser
+            </button>
+        </div>
+
+        <div id="loading" class="flex flex-col items-center justify-center py-20">
+            <div class="loader w-12 h-12 border-4 border-white/10 rounded-full mb-4"></div>
+            <p class="text-slate-500">Appel à l'API en cours...</p>
+        </div>
+
+        <div id="api-content" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+            </div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            const container = document.getElementById('api-content');
+            const loader = document.getElementById('loading');
+
+            loader.classList.remove('hidden');
+            container.classList.add('hidden');
+            container.innerHTML = ''; // On vide le contenu précédent
+
+            try {
+                const response = await fetch('/api/projets/');
+                const data = await response.json();
+
+                data.forEach(projet => {
+                    const card = `
+                        <div class="glass p-6 hover:border-blue-500/50 transition cursor-default">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-xl font-bold text-blue-400">${projet.nom}</h3>
+                                <span class="text-[10px] bg-white/10 px-2 py-1 rounded text-slate-400 uppercase">ID: ${projet.id}</span>
+                            </div>
+                            <p class="text-slate-400 text-sm mb-6">${projet.description || 'Pas de description.'}</p>
+                            <div class="flex items-center gap-2 text-xs text-slate-500">
+                                <i class="fas fa-tasks text-blue-500"></i>
+                                <span>${projet.nombre_taches} tâches assignées</span>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+
+                loader.classList.add('hidden');
+                container.classList.remove('hidden');
+            } catch (error) {
+                console.error("Erreur API:", error);
+                loader.innerHTML = `<p class="text-red-400">Erreur lors de la récupération des données.</p>`;
+            }
+        }
+
+        // Charger les données au lancement
+        window.onload = fetchData;
+    </script>
+</body>
+</html>

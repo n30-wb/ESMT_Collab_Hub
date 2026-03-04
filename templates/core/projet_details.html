@@ -1,0 +1,147 @@
+{% extends "core/dashboard.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <a href="{% url 'dashboard' %}" class="text-blue-400 hover:text-blue-300 mb-6 inline-flex items-center gap-2 transition">
+        <i class="fas fa-chevron-left text-xs"></i> Retour au Dashboard
+    </a>
+
+    <div class="flex flex-col lg:flex-row justify-between items-start gap-8 mb-10">
+        <div class="flex-1">
+            <h1 class="text-4xl font-bold text-white">{{ projet.nom }}</h1>
+            <p class="text-slate-400 mt-3 text-lg">{{ projet.description }}</p>
+        </div>
+
+        <div class="glass p-6 w-full lg:w-80 border-t-4 border-blue-500">
+            <h3 class="text-xs font-bold mb-4 text-blue-400 uppercase tracking-widest">Équipe du Projet</h3>
+            <div class="flex flex-wrap gap-2 mb-6">
+                {% for membre in projet.membres.all %}
+                    <div title="{{ membre.username }} ({{ membre.role }})"
+                         class="w-10 h-10 rounded-full bg-slate-800 border border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-400">
+                        {{ membre.username|first|upper }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <form action="{% url 'ajouter_membre' projet.id %}" method="POST" class="space-y-3">
+                {% csrf_token %}
+                <select name="user_id" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 text-slate-300">
+                    <option value="" disabled selected>Ajouter un membre...</option>
+                    {% for u in utilisateurs %}
+                        <option value="{{ u.id }}">{{ u.username }} ({{ u.role }})</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="w-full bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white py-2 rounded-lg text-xs font-bold transition border border-blue-500/30">
+                    Confirmer l'ajout
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div class="flex flex-col gap-4">
+            <div class="flex justify-between items-center px-2">
+                <h2 class="font-bold text-slate-400 uppercase text-xs tracking-widest">À Faire</h2>
+                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded text-[10px]">{{ taches.count }}</span>
+            </div>
+            <div class="glass p-4 min-h-[400px] border-t-2 border-slate-500/30 flex flex-col gap-4">
+                <button onclick="toggleTacheModal()" class="w-full py-3 border-2 border-dashed border-white/5 rounded-xl text-slate-500 hover:border-blue-500/50 hover:text-blue-400 transition text-sm flex items-center justify-center gap-2 mb-2">
+                    <i class="fas fa-plus-circle"></i> Créer une tâche
+                </button>
+
+                {% for tache in taches %}
+                    {% if tache.statut == 'A_FAIRE' %}
+                    <div class="bg-white/5 border border-white/10 p-4 rounded-xl hover:border-blue-500/50 transition group">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-sm text-white">{{ tache.titre }}</h4>
+                            <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded uppercase">{{ tache.assigne_a.username }}</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-3">{{ tache.description }}</p>
+                        <div class="flex justify-between items-center">
+                            <div class="text-[10px] text-slate-500"><i class="far fa-clock"></i> {{ tache.date_limite|date:"d M" }}</div>
+                            <a href="{% url 'changer_statut_tache' tache.id 'EN_COURS' %}" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg font-bold transition">
+                                Démarrer <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            <h2 class="font-bold text-blue-400 uppercase text-xs tracking-widest px-2">En Cours</h2>
+            <div class="glass p-4 min-h-[400px] border-t-2 border-blue-500/50 shadow-lg shadow-blue-500/5 flex flex-col gap-4">
+                {% for tache in taches %}
+                    {% if tache.statut == 'EN_COURS' %}
+                    <div class="bg-blue-500/5 border border-blue-500/20 p-4 rounded-xl hover:border-blue-500/50 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-sm text-blue-100">{{ tache.titre }}</h4>
+                            <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded uppercase">{{ tache.assigne_a.username }}</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-3">{{ tache.description }}</p>
+                        <a href="{% url 'changer_statut_tache' tache.id 'TERMINE' %}" class="w-full block text-center text-[10px] bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-lg font-bold transition">
+                            Terminer <i class="fas fa-check ml-1"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            <h2 class="font-bold text-green-400 uppercase text-xs tracking-widest px-2">Terminé</h2>
+            <div class="glass p-4 min-h-[400px] border-t-2 border-green-500/50 flex flex-col gap-4">
+                {% for tache in taches %}
+                    {% if tache.statut == 'TERMINE' %}
+                    <div class="bg-green-500/5 border border-green-500/20 p-4 rounded-xl opacity-70">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-sm text-green-100 line-through">{{ tache.titre }}</h4>
+                            <i class="fas fa-check-circle text-green-500 text-xs"></i>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-2 italic text-right">Fini le {{ tache.date_fin_reelle|date:"d M à H:i" }}</p>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="tacheModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="glass p-8 rounded-2xl w-full max-w-md border border-blue-500/30">
+        <h2 class="text-2xl font-bold mb-6 text-blue-400">Nouvelle Tâche</h2>
+        <form action="{% url 'creer_tache' projet.id %}" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <input type="text" name="titre" placeholder="Titre de la tâche" required class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 text-white">
+            <textarea name="description" placeholder="Description..." class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 text-white"></textarea>
+
+            <div>
+                <label class="text-xs text-slate-400">Assigner à :</label>
+                <select name="assigne_a" class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 text-slate-300">
+                    {% for membre in projet.membres.all %}
+                        <option value="{{ membre.id }}">{{ membre.username }} ({{ membre.role }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="text-xs text-slate-400">Date limite :</label>
+                <input type="datetime-local" name="date_limite" required class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 text-white">
+            </div>
+            <div class="flex gap-4 mt-6">
+                <button type="button" onclick="toggleTacheModal()" class="flex-1 py-3 bg-white/10 rounded-lg transition">Annuler</button>
+                <button type="submit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold transition">Créer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleTacheModal() {
+        const modal = document.getElementById('tacheModal');
+        modal.classList.toggle('hidden');
+        modal.classList.toggle('flex');
+    }
+</script>
+{% endblock %}

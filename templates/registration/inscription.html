@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>ESMT Collab Hub | Inscription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="glass p-8 w-full max-w-md shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-400 italic">Rejoindre l'ESMT</h1>
+            <p class="text-slate-400 mt-2">Créez votre compte collaboratif</p>
+        </div>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs text-slate-400 uppercase mb-1">Nom d'utilisateur</label>
+                <input type="text" name="username" required class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 transition">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 uppercase mb-1">Adresse Email</label>
+                <input type="email" name="email" required class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 transition">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 uppercase mb-1">Je suis un(e)...</label>
+                <select name="role" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 transition text-white">
+                    <option value="ETUDIANT">Étudiant</option>
+                    <option value="PROFESSEUR">Professeur</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-slate-400 uppercase mb-1">Mot de passe</label>
+                    <input type="password" name="password" required class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 uppercase mb-1">Confirmation</label>
+                    <input type="password" name="confirm_password" required class="w-full bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500 transition">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-xl font-bold transition shadow-lg shadow-blue-500/20 mt-4">
+                Créer mon compte
+            </button>
+        </form>
+
+        <p class="text-center mt-6 text-sm text-slate-500">
+            Déjà inscrit ? <a href="{% url 'login' %}" class="text-blue-400 hover:underline">Connectez-vous</a>
+        </p>
+    </div>
+</body>
+</html>
